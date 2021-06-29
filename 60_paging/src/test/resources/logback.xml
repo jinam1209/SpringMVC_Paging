@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+   <property name="USER_HOME" value="/_javaweb/_spring/logDir" />
+   <appender name="STDOUT"
+      class="ch.qos.logback.core.ConsoleAppender">
+      <!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder 
+         by default -->
+      <encoder>
+         <pattern>%date %level [%thread] [%logger{0}:%line] - %msg%n</pattern>
+      </encoder>
+   </appender>
+   <appender name="FILE"
+      class="ch.qos.logback.core.rolling.RollingFileAppender">
+      <file>${USER_HOME}/myApp.log</file>
+      <encoder>
+         <pattern>%date %level [%thread] [%logger{0}:%line] - %msg%n</pattern>
+      </encoder>
+      <rollingPolicy
+         class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+         <fileNamePattern>AppLog_%d{yyyy-MM-dd}.zip</fileNamePattern>
+         <maxHistory>30</maxHistory>
+         <totalSizeCap>100MB</totalSizeCap>
+      </rollingPolicy>
+   </appender>
+   <appender name="ERROR"
+      class="ch.qos.logback.core.rolling.RollingFileAppender">
+      <filter class="ch.qos.logback.classic.filter.LevelFilter">
+         <level>error</level>
+         <onMismatch>DENY</onMismatch>
+      </filter>
+      <file>${USER_HOME}/myAppError.log</file>
+      <encoder>
+         <pattern>%date %level [%thread] [%logger{0}:%line] - %msg%n</pattern>
+      </encoder>
+      <rollingPolicy
+         class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+         <fileNamePattern>AppLog_%d{yyyy-MM-dd}_Error.zip</fileNamePattern>
+         <maxHistory>30</maxHistory>
+         <totalSizeCap>100MB</totalSizeCap>
+      </rollingPolicy>
+   </appender>
+
+   <logger name="jdbc" level="OFF" />
+   <logger name="jdbc.sqlonly" level="OFF" />
+   <logger name="jdbc.sqltiming" level="info" />
+   <logger name="jdbc.resultsettable" level="info" />
+   <logger name="jdbc.audit" level="OFF" />
+   <logger name="jdbc.resultset" level="OFF" />
+   <logger name="jdbc.connection" level="OFF" />
+
+   <root level="info">
+      <appender-ref ref="STDOUT" />
+      <appender-ref ref="FILE" />
+      <appender-ref ref="ERROR" />
+   </root>
+</configuration>

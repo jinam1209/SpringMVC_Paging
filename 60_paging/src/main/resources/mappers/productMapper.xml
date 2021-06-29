@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="ProductMapper">
+	 <sql id="bc">
+	 	from tbl_product where pno=#{pno}
+	 </sql>
+	 <sql id="search">
+	 	<if test="range != null">
+	 		<trim prefix="where" suffix="">
+	 			<choose>
+	 				<when test="range == 'tcw'.toString()">
+	 					title like '%'||#{keyword}||'%' or 
+ 		     		    content like '%'||#{keyword}||'%' or 
+ 		     			writer like '%'||#{keyword}||'%' 
+	 				</when>
+	 				<when test="range == 't'.toString()">
+	 					title like '%'||#{keyword}||'%'
+	 				</when>
+	 				<when test="range == 'c'.toString()">
+	 					content like '%'||#{keyword}||'%'
+	 				</when>
+	 				<when test="range == 'w'.toString()">
+	 					writer like '%'||#{keyword}||'%'
+	 				</when>
+	 				<when test="range == 'tc'.toString()">
+	 					title like '%'||#{keyword}||'%' or 
+ 		     		    content like '%'||#{keyword}||'%'
+	 				</when>
+	 			</choose>
+	 		</trim>
+	 	</if>
+	 </sql>
+ 	<insert id="reg" parameterType="pvo">
+ 		insert into tbl_product(pno, title, content, writer, price)
+ 		values (seq_product_pno.nextval, #{title}, trim(#{content}), #{writer}, #{price})
+ 	</insert>
+ 	
+ 	<select id="list" parameterType="pgvo" resultType="pvo">
+ 		select pno, title, writer, readcount, moddate
+ 		from tbl_product 
+ 		<include refid="search"/>
+ 	</select>
+ 	
+ 	<select id="detail" parameterType="int" resultType="pvo">
+ 		select * <include refid="bc"/>
+ 	</select>
+ 	<select id="curr" resultType="int">
+ 		select seq_product_pno.currval from dual
+ 	</select>
+ 	<!-- curr : select max(pno) from tbl_product -->
+ 	
+ 	<update id="mod" parameterType="pvo">
+ 		update tbl_product set title=#{title}, content=trim(#{content}), price=#{price},
+ 		moddate=sysdate where pno=#{pno}
+ 	</update>
+ 	
+ 	<delete id="del" parameterType="int">
+ 		delete <include refid="bc"/>
+ 	</delete>
+ </mapper>
