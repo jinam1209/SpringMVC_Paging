@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.myweb.domain.PageVO;
 import com.myweb.domain.ProductVO;
+import com.myweb.handler.PagingHandler;
 import com.myweb.orm.FileProcessor;
 import com.myweb.service.product.ProductServiceRule;
 
@@ -63,6 +64,8 @@ public class ProductController {
 	@GetMapping("/list")
 	public void list(Model model, PageVO pgvo) {
 		model.addAttribute("list", psv.getList(pgvo));
+		int totalCount = psv.getTotalCount(pgvo);
+		model.addAttribute("pghdl", new PagingHandler(totalCount, pgvo));
 	}
 	@PostMapping("/register")
 	public String register(ProductVO pvo, RedirectAttributes reAttr,

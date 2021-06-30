@@ -12,4 +12,5 @@ public interface ProductDAORule {
 	public int update(ProductVO pvo);
 	public int delete(int pno);
 	public int selectOne();
+	public int selectOne(PageVO pgvo);
 }

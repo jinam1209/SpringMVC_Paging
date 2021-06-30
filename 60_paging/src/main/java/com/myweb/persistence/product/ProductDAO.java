@@ -50,4 +50,9 @@ public class ProductDAO implements ProductDAORule {
 		return sql.selectOne(NS + "curr");
 	}
 
+	@Override
+	public int selectOne(PageVO pgvo) {
+		return sql.selectOne(NS + "tc", pgvo);
+	}
+
 }

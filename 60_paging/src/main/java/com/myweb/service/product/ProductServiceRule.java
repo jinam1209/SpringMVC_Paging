@@ -12,4 +12,5 @@ public interface ProductServiceRule {
 	public int modify(ProductVO pvo);
 	public int remove(int pno);
 	public int getCurrPno();
+	public int getTotalCount(PageVO pgvo);
 }

@@ -8,7 +8,7 @@
 	 </sql>
 	 <sql id="search">
 	 	<if test="range != null">
-	 		<trim prefix="where" suffix="">
+	 		<trim prefix="and (" suffix=")">
 	 			<choose>
 	 				<when test="range == 'tcw'.toString()">
 	 					title like '%'||#{keyword}||'%' or 
@@ -38,9 +38,17 @@
  	</insert>
  	
  	<select id="list" parameterType="pgvo" resultType="pvo">
+ 	<![CDATA[
  		select pno, title, writer, readcount, moddate
- 		from tbl_product 
+ 		from (select /*+INDEX_DESC(tbl_product pk_product)*/
+ 				rownum as rn, pno, title, writer, readcount, moddate
+ 				from tbl_product where pno > 0
+ 	]]>
  		<include refid="search"/>
+ 	<![CDATA[
+ 				and rownum <= #{pageIndex} * #{countPerPage})
+ 		where rn > (#{pageIndex}-1) * #{countPerPage}
+ 	]]>
  	</select>
  	
  	<select id="detail" parameterType="int" resultType="pvo">
@@ -50,6 +58,13 @@
  		select seq_product_pno.currval from dual
  	</select>
  	<!-- curr : select max(pno) from tbl_product -->
+ 	<select id="tc" parameterType="pgvo" resultType="int">
+ 	<![CDATA[
+ 		select count(pno) as cnt from tbl_product
+ 		where pno > 0 
+ 	]]>
+ 		<include refid="search"></include>
+ 	</select>
  	
  	<update id="mod" parameterType="pvo">
  		update tbl_product set title=#{title}, content=trim(#{content}), price=#{price},

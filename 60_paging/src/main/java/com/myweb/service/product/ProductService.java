@@ -59,4 +59,9 @@ public class ProductService implements ProductServiceRule {
 		return pdao.selectOne();
 	}
 
+	@Override
+	public int getTotalCount(PageVO pgvo) {
+		return pdao.selectOne(pgvo);
+	}
+
 }
