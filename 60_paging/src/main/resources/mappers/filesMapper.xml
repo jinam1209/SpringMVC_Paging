@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="FilesMapper">
+	<sql id="bc">
+		from tbl_files where pno=#{pno}
+	</sql>
+ 	<insert id="reg" parameterType="fvo">
+ 		insert into tbl_files
+ 		values (#{uuid}, #{savedir}, #{fname}, #{ftype}, #{pno})
+ 	</insert>
+ 	<select id="list" parameterType="int" resultType="fvo">
+ 		select * <include refid="bc"></include>
+ 	</select>
+ 	<delete id="del">
+ 		delete <include refid="bc"></include>
+ 	</delete>
+ 	<delete id="delOne" parameterType="String">
+ 		delete from tbl_files where uuid=#{uuid}
+ 	</delete>
+ </mapper>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="CommentMapper">
+	 <sql id="bcc">
+	 	from tbl_comment where cno=#{cno}
+	 </sql>
+	 <sql id="bcp">
+	 	from tbl_comment where pno=#{pno}
+	 </sql>
+	 <sql id="search">
+	 	<if test="range != null">
+	 		<trim prefix="and (" suffix=")">
+	 			<choose>
+	 				<when test="range == 'cwr'.toString()">
+	 					content like '%'||#{keyword}||'%' or 
+ 		     		    writer like '%'||#{keyword}||'%' or
+ 		     		    to_char(regdate,'yyyy-MM-dd') like '%'||#{keyword}||'%'
+	 				</when>
+	 				<when test="range == 'c'.toString()">
+	 					content like '%'||#{keyword}||'%'
+	 				</when>
+	 				<when test="range == 'w'.toString()">
+	 					writer like '%'||#{keyword}||'%'
+	 				</when>
+	 				<when test="range == 'r'.toString()">
+	 					to_char(regdate,'yyyy-MM-dd') like '%'||#{keyword}||'%'
+	 				</when>
+	 				<when test="range == 'cw'.toString()">
+	 					content like '%'||#{keyword}||'%' or
+	 					writer like '%'||#{keyword}||'%'
+	 				</when>
+	 			</choose>
+	 		</trim>
+	 	</if>
+	 </sql>
+ 	<insert id="reg" parameterType="cvo">
+ 		insert into tbl_comment(cno, pno, writer, content)
+ 		values (seq_comment_cno.nextval, #{pno}, #{writer}, trim(#{content}))
+ 	</insert>
+ 	<select id="list" parameterType="int" resultType="cvo">
+ 	<![CDATA[
+ 		select cno, pno, writer, content, regdate
+ 		from (select /*INDEX(tbl_comment pk_comment*/
+ 				rownum as rn, cno, pno, writer, content, regdate
+ 	
+ 	]]>
+		<include refid="bcp"/>
+		<include refid="search"/>
+	<![CDATA[	
+				and rownum <= #{pageIndex}*10)
+		where rn > (#{pageIndex}-1) * 10
+	]]>
+ 	</select>
+ 	<select id="tc" parameterType="hashmap" resultType="int">
+ 		select count(cno) <include refid="bcp"/>
+ 	</select>
+ 	<update id="mod" parameterType="cvo">
+ 		update tbl_comment set content=trim(#{content}), regdate=sysdate
+ 		where cno=#{cno}
+ 	</update>
+ 	<delete id="del" parameterType="int">
+ 		delete <include refid="bcc"/>
+ 	</delete>
+ 	<delete id="dellAll" parameterType="int">
+ 		delete <include refid="bcp"/>
+ 	</delete>
+ </mapper>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="MemberMapper">
+ 	<sql id="bc">
+ 		from tbl_member where email=#{email}
+ 	</sql>
+ 	<sql id="search">
+	 	<if test="range != null">
+	 		<trim prefix="and(" suffix=")">
+	 			<choose>
+	 				<when test="range == 'en'.toString()">
+	 					email like '%'||#{keyword}||'%' or 
+ 		     		    nickname like '%'||#{keyword}||'%'
+	 				</when>
+	 				<when test="range == 'e'.toString()">
+	 					email like '%'||#{keyword}||'%'
+	 				</when>
+	 				<when test="range == 'n'.toString()">
+	 					nickname like '%'||#{keyword}||'%'
+	 				</when>
+	 				<when test="range == 'r'.toString()">
+	 					to_char(regdate,'yyyy-MM-dd') like '%'||#{keyword}||'%'
+	 				</when>
+	 			</choose>
+	 		</trim>
+	 	</if>
+	 </sql>
+ 	<insert id="reg" parameterType="mvo">
+ 		insert into tbl_member(email, pwd, nickname)
+ 		values (#{email}, #{pwd}, #{nickname})
+ 	</insert>
+ 	<select id="check" parameterType="String" resultType="int">
+ 		select count(email) as cnt <include refid="bc"/>
+ 	</select>
+ 	<select id="list" parameterType="pgvo" resultType="mvo">
+ 	<![CDATA[
+ 		select email, nickname, regdate
+ 		from (select /*+INDEX_DESC(tbl_member pk_member)*/
+ 				rownum as rn, email, nickname, regdate
+ 				from tbl_member where email is not null
+ 	]]>
+ 		<include refid="search"/>
+ 	<![CDATA[
+ 				and rownum <= #{pageIndex} * #{countPerPage})
+ 		where rn > (#{pageIndex}-1) * #{countPerPage}
+ 	]]>
+ 	</select>
+ 	<select id="login" parameterType="mvo" resultType="mvo">
+ 		select * <include refid="bc"/> and pwd=#{pwd}
+ 	</select>
+ 	<select id="detail" parameterType="String" resultType="mvo">
+ 		select * <include refid="bc"/>
+ 	</select>
+ 	<select id="tc" parameterType="pgvo" resultType="int">   
+ 		select count(email) as cnt from tbl_member
+ 		where email is not null
+ 		<include refid="search"/>
+ 	</select>
+ 	
+ 	<update id="mod" parameterType="mvo">
+ 		update tbl_member set pwd=#{pwd}, nickname=#{nickname} 
+ 		where email=#{email}
+ 	</update>
+ 	<delete id="del" parameterType="String">
+ 		delete <include refid="bc"/>
+ 	</delete>
+ </mapper>
