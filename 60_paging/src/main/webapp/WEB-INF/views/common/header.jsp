@@ -12,8 +12,6 @@
   <script src="/resources/bootstrap/js/jquery-3.6.0.min.js"></script>
   <script src="/resources/bootstrap/js/popper.min.js"></script>
   <script src="/resources/bootstrap/js/bootstrap.min.js"></script>
-  <!-- GET http://localhost:9090/favicon.ico 404 해결코드 -->
-  <link rel="shortcut icon" href="#">
 </head>
 <body>
 
