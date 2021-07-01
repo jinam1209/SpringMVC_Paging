@@ -9,6 +9,10 @@
 	<c:when test="${ses.email eq pvo.writer }">
 		<form action="/product/modify" method="post" enctype="multipart/form-data">
 		  <input type="hidden" name="pno" value="${pvo.pno }">
+		  <input type="hidden" name="pageIndex" value="${pgvo.pageIndex }">
+		  <input type="hidden" name="countPerPage" value="${pgvo.countPerPage }">
+		  <input type="hidden" name="range" value="${pgvo.range }">
+		  <input type="hidden" name="keyword" value="${pgvo.keyword }">
 		  <div class="form-group">
 		    <label for="title">Title:</label>
 		    <input type="text" class="form-control" value="${pvo.title }" id="title" name="title">
@@ -81,7 +85,7 @@
 	         </script>
 	      </c:if>
 		  <button type="submit" class="btn btn-primary float-left">Submit</button>
-		  <a href="/product/detail?pno=${pvo.pno }" class="btn btn-success float-right">종료</a>
+		  <a href="/product/detail?pno=${pvo.pno }&pageIndex=${pgvo.pageIndex}&countPerPage=${pgvo.countPerPage}&range=${pgvo.range}&keyword=${pgvo.keyword}" class="btn btn-success float-right">종료</a>
 		</form>
 	      <script>
 			$(document).on("click", "#fileTrigger", function() {

@@ -5,6 +5,8 @@
 <jsp:include page="../common/nav.jsp" />
 
 <h2>Product Detail</h2>
+<a href="/product/list?pageIndex=${pgvo.pageIndex}&countPerPage=${pgvo.countPerPage}&range=${pgvo.range}&keyword=${pgvo.keyword}" 
+	class="btn btn-primary float-right">LIST</a>
   <table class="table table-striped table-bordered">
     <thead>
       <tr>
@@ -74,7 +76,7 @@
    		<tfoot>
    			<tr>
    				<td colspan="2">
-   					<a href="/product/modify?pno=${pvo.pno }" 
+   					<a href="/product/modify?pno=${pvo.pno }&pageIndex=${pgvo.pageIndex}&countPerPage=${pgvo.countPerPage}&range=${pgvo.range}&keyword=${pgvo.keyword}" 
    						class="btn btn-outline-warning">수정</a>
    					<button type="button" class="btn btn-outline-danger" id="delBtn">삭제</button>
    				</td> 
@@ -82,6 +84,10 @@
    		</tfoot>
    		<form action="/product/remove" id="delForm" method="post">
    			<input type="hidden" name="pno" value="${pvo.pno }">
+		    <input type="hidden" name="pageIndex" value="${pgvo.pageIndex }">
+		    <input type="hidden" name="countPerPage" value="${pgvo.countPerPage }">
+		    <input type="hidden" name="range" value="${pgvo.range }">
+		    <input type="hidden" name="keyword" value="${pgvo.keyword }">
    		</form>
    		<script>
    			$("#delBtn").on("click", function() {
@@ -122,7 +128,7 @@
 </c:if>
 <div id="accordion" style="clear: both;"></div>
 <!-- paging -->
-<ul class="pagination justify-content-center pagination-sm" id="pg"></ul>
+<ul class="pagination justify-content-center pagination-sm mt-2" id="pgn"></ul>
 <!-- 추가된 부분 The Modal -->
   <div class="modal fade" id="modModal">
     <div class="modal-dialog modal-sm">
@@ -146,128 +152,149 @@
 <!-- Modal End -->
 
 <script>
-	function modify_comment(cmtObj) {
-		let pno_val = $("#pnoVal").text();
-		$.ajax({
-			url: "/comment/" + cmtObj.cno,
-			type: "put",
-			data: JSON.stringify(cmtObj),
-			contentType: "application/json; charset=utf-8"
-		}).done(function() {
-			alert("댓글 수정 성공!!");
-			list_comment(pno_val); // list renewal
-		}).fail(function(err) {
-			alert("댓글 수정 샐패..");
-		}).always(function() { // 추가
-	        $(document).find("button.close").click();
-	    });
-	}
-	
-	function remove_comment(cno){
-		let pno_val = $("#pnoVal").text();
-		$.ajax({
-			url: "/comment/" + cno,
-			type: "delete"
-		}).done(function(result) {
-			alert("댓글 삭제 성공!!"); // list renewal
-			list_comment(pno_val);
-		}).fail(function(err) {
-			alert("댓글 삭제 실패..");
-			 console.log(err);
-		});
-	}
-	
-	function make_paging(totalCount, pageIndex) {
-		let lastPageIndex = "?";
-		let firstPageIndex = "?";
-		let prev = "?";
-		let next = "?";
-		
-		if(lastPageIndex * 10 >= totalCount) {
-			lastPageIndex = Math.ceil(totalCount / 10.0);
-		} else {
-			next = true;
-		}
-		print_pagination(prev, firstPageIndex, pageIndex, lastPageIndex, next);
-	}
-	
-	function print_list(cmt_dto, pageIndex) {
-		if(cmt_dto.clist.length == 0) {
-			alert("Comment List is empty");
-			return;
-		} else {
-			let listZone = $("#accordion");
-			listZone.empty();
-			let ses_email = '<c:out value="${ses.email}"/>';
-			for (let cvo of cmt_dto.clist) { // clist => 배열, 자바스크립트는 forEach 대신 forOf 사용
-				let card = '<div class="card">';
-				card += '<div class="card-header">';
-				card += '<a class="collapsed card-link" data-toggle="collapse" href="#cmt'+ cvo.cno +'">';
-			    card += '<span class="cmt_regdate">'+ cvo.regdate +'</span><span>'+ cvo.writer +'</span></a>';
-			    if(cvo.writer == ses_email) {
-			    	// 수정된 부분 시작
-			    	card += ' <i class="fa fa-wrench" data-toggle="modal" data-target="#modModal"';
-	                card += ' style="color:orange" data-cno="' + cvo.cno + '"></i>';
-	                // 수정된 부분 끝
-	                card += ' <i class="fa fa-remove" style="color:red" data-cno="' + cvo.cno + '"></i>';
-
-			    }
-			    card += '</div><div id="cmt'+ cvo.cno +'" class="collapse" data-parent="#accordion">'; 
-			  	card += '<div class="card-body">'+ cvo.content +'</div></div></div>';
-				listZone.append(card);
-			}
-			$(".cmt_regdate").css("margin-right", "30px");
-			make_paging(cmt_dto.totalCount, pageIndex);
-		}
-	}
-	function list_comment(pno, pageIndex,r="", kw="") { // getJSON = GET 방식으로 json data를 받아오는 ajax
-		let url_val = (r==""||kw=="") ? "/comment/pno/" + pno + "/" + pageIndex + "/" + ".json"
-				: "/comment/pno/" + pno + "/" + pageIndex + "/" + r + "/" + kw + ".json";
-		$.getJSON(url_val, function(result) { // server에서 주는 result 받아옴
-			console.log(result.cmtlist);
-			console.log(result.totalcount);
-			print_list(result, pageIndex); // 여기서 풀지 않기 위해
-		}).fail(function(err) {
-			console.log(err);
-			alert("댓글 리스트 로딩 실패!");
-		});
-	}
-	function write_comment() {
-		let pno_val = $("#pnoVal").text(); // pno
-		let writer_val = $("#cmtWriter").text(); // writer
-		let content_val = $("#cmtInput").val(); // content
-		if(content_val == null || content_val == '') {
-			alert("댓글 내용을 입력하세요!");
-			return false;
-		} else {
-			// 객체로 만드는 이유 -> json data로 만들기 위해!!
-			let cmt_data ={
-				pno: pno_val,
-				writer: writer_val,
-				content: content_val
-			};
-			$.ajax({
-				url: "/comment/register",
-				type: "post",
-				data: JSON.stringify(cmt_data),
-				contentType: "application/json; charset=utf-8" // 전송 방식 json으로 변경!
-			}).done(function(result) {
-				alert("댓글 입력 성공~~");
-				list_comment(pno_val); // list 불러오려면 pno 필요~
-			}).fail(function(err) {
-				alert("댓글 입력 실패..");
-			}).always(function() {
-				$("#cmtInput").val("");
-			});
-		}
-	}
+   function modify_comment(cmtObj){
+      let pno_val = $("#pnoVal").text();      
+      $.ajax({
+         url: "/comment/"+cmtObj.cno,
+         type: "put",
+         data: JSON.stringify(cmtObj),
+         contentType: "application/json; charset=utf-8"
+      }).done(function(result) {
+         alert("댓글 수정 성공~");
+         list_comment(pno_val); // list renewal
+      }).fail(function(err) {
+         console.log(err);
+         alert("댓글 수정 실패!");
+      }).always(function() { // 추가
+         $(document).find("button.close").click();
+      });
+   }
+   function remove_comment(cno){
+      let pno_val = $("#pnoVal").text();
+      $.ajax({
+         url: "/comment/"+cno,
+         type: "delete"
+      }).done(function(result) {
+         alert("댓글 삭제 성공~");
+         list_comment(pno_val);
+      }).fail(function(err) {
+         alert("댓글 삭제 실패~");
+         console.log(err);
+      });
+   }
+   $(document).on("click", "#pgn li a", function(e){
+      e.preventDefault();
+      list_comment($("#pnoVal").text(), $(this).attr("href"),
+            $("#range option:selected").val(), $("#keyword").val());
+   });
+   function print_pagination(prev, fpgi, pgi, lpgi, next){
+      let pgn ='';
+      if(prev){
+         pgn += '<li class="page-item"><a class="page-link" href="'+(fpgi-1)+'">Prev</a></li>';
+      }
+      for (let i = fpgi; i <= lpgi; i++) {
+         let classActive = pgi == i ? 'active' : '';
+         pgn += '<li class="page-item '+classActive+'"><a class="page-link" href="'+i+'">'+i+'</a></li>';
+      }
+      if(next){
+         pgn += '<li class="page-item"><a class="page-link" href="'+(lpgi+1)+'">Next</a></li>';
+      }
+      $("#pgn").html(pgn);
+   }
+   function make_paging(totalCount, pageIndex){
+      let lastPageIndex = Math.ceil(pageIndex / 10.0) * 10;
+      let firstPageIndex =lastPageIndex - 9;
+      let prev = firstPageIndex != 1;
+      let next = false;
+      
+      if(lastPageIndex * 10 >= totalCount){
+         lastPageIndex = Math.ceil(totalCount / 10.0);
+      }else {
+         next = true;
+      }
+      console.log(prev+"/"+firstPageIndex+"/"+pageIndex+"/"+pageIndex+"/"+lastPageIndex+"/"+next);
+      print_pagination(prev, firstPageIndex, pageIndex, lastPageIndex, next);
+   }
+   function print_list(cmt_dto, pageIndex){
+      if(cmt_dto.cmtlist.length==0){
+         alert("Comment List is empty");
+         return;
+      }else{
+         let listZone = $("#accordion");
+         listZone.empty();
+         let ses_email = '<c:out value="${ses.email}"/>';
+         
+         for (let cvo of cmt_dto.cmtlist) {
+            let card = '<div class="card">';
+            card += '<div class="card-header">';
+             card += '<a class="collapsed card-link" data-toggle="collapse" href="#cmt'+cvo.cno+'">';
+             card += '<span class="cmt_regdate">'+cvo.regdate+'</span><span>'+cvo.writer+'</span></a>';
+             if(cvo.writer == ses_email){
+                // 수정된 부분 시작
+                card += ' <i class="fa fa-wrench" data-toggle="modal" data-target="#modModal"';
+                card += ' style="color:orange" data-cno="' + cvo.cno + '"></i>';
+                // 수정된 부분 끝
+                card += ' <i class="fa fa-remove" style="color:red" data-cno="' + cvo.cno + '"></i>';
+             }
+             card += '</div><div id="cmt'+cvo.cno+'" class="collapse" data-parent="#accordion">';
+             card += '<div class="card-body">'+cvo.content+'</div></div></div>';
+             listZone.append(card);
+         }
+         $(".cmt_regdate").css("margin-right", "30px");
+         make_paging(cmt_dto.totalCount, pageIndex);         
+      }
+   }
+   function list_comment(pno, pgIdx, r="", kw="") {
+      console.log("pgIdx : " + pgIdx);
+      let pageIndex = pgIdx < 1 ? 1 : pgIdx;
+      let url_val = (r=="" || kw=="") ? "/comment/pno/" + pno+ "/" + pageIndex + ".json"
+            : "/comment/pno/" + pno + "/" + pageIndex + "/" + r +"/"+ kw + ".json";
+      $.getJSON(url_val, function(result) {
+    	  console.log(result);
+         console.log(result.cmtlist);
+         console.log(result.totalCount);
+         print_list(result, pageIndex);
+      }).fail(function(err) {
+         console.log(err);
+         alert("댓글 리스트 로딩 실패!");
+      });
+   }
+   function write_comment() {
+      let pno_val = $("#pnoVal").text();
+      let writer_val = $("#cmtWriter").text();
+      let content_val = $("#cmtInput").val();
+      if(content_val == null || content_val == ''){
+         alert("댓글 내용을 입력하세요!");
+         return false;
+      }else{
+         let cmt_data ={
+            pno: pno_val,
+            writer: writer_val,
+            content: content_val
+         };
+         $.ajax({
+            url: "/comment/register",
+            type: "post",
+            data: JSON.stringify(cmt_data),
+            contentType: "application/json; charset=utf-8"
+         }).done(function(result) {
+            alert("댓글 입력 성공~");
+            list_comment(pno_val);
+         }).fail(function(err) {
+            alert("댓글 입력 실패!");
+            console.log(err);
+         }).always(function() {
+            $("#cmtInput").val("");
+         });
+      }
+   }
 </script>
 <script>
 	$(document).on("click", "#searchBtn", function() {
 		let range_val = $("#range option:selected").val();
 		let kw_val = $("#keyword").val();
 		let pno_val = $("#pnoVal").text();
-		list_comment(pno_val, range_val, kw_val)
+		list_comment(pno_val, 1, range_val, kw_val)
 	});
 	$(document).on("click", "#cmtSubmit", write_comment); // 실행이 아닌 이름을 부르는 것 () 필요 없음 => call back
 	$(document).on("click", ".fa-remove", function() { // cno 가져오기~

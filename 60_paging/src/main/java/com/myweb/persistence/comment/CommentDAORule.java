@@ -11,5 +11,5 @@ public interface CommentDAORule {
 	public int update(CommentVO cvo);
 	public int delete(int cno);
 	public int deleteAll(int pno);
-	public int selectCount(int pno);
+	public int selectCount(int pno, PageVO pgvo);
 }

@@ -54,7 +54,7 @@
 	]]>
  	</select>
  	<select id="tc" parameterType="hashmap" resultType="int">
- 		select count(cno) <include refid="bcp"/>
+ 		select count(cno) <include refid="bcp"/> <include refid="search"/>
  	</select>
  	<update id="mod" parameterType="cvo">
  		update tbl_comment set content=trim(#{content}), regdate=sysdate

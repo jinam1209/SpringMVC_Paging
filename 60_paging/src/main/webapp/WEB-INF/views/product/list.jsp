@@ -43,7 +43,7 @@
   		 	 <c:forEach items="${list }" var="pvo">
     		  <tr>
      		   <td>${pvo.pno }</td>
-     		   <td><a href="/product/detail?pno=${pvo.pno }">${pvo.title }</a></td>
+     		   <td><a href="/product/detail?pno=${pvo.pno }&pageIndex=${pghdl.pgvo.pageIndex}&countPerPage=${pghdl.pgvo.countPerPage}&range=${pghdl.pgvo.range}&keyword=${pghdl.pgvo.keyword}">${pvo.title }</a></td>
      		   <td>${pvo.writer }</td>
      		   <td>${pvo.readcount }</td>
      		   <td>${pvo.moddate }</td>

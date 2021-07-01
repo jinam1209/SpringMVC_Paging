@@ -53,7 +53,12 @@ public class CommentDAO implements CommentDAORule {
 	}
 
 	@Override
-	public int selectCount(int pno) {
-		return sql.selectOne(NS + "tc", pno);
+	public int selectCount(int pno, PageVO pgvo) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("pno", (Integer)pno);
+		map.put("pageIndex", (Integer)pgvo.getPageIndex());
+		map.put("range", (String)pgvo.getRange());
+		map.put("keyword", (String)pgvo.getKeyword());
+		return sql.selectOne(NS + "tc", map);
 	}
 }

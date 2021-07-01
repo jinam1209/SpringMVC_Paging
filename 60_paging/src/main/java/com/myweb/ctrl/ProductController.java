@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,25 +40,28 @@ public class ProductController {
 	}
 	
 	@PostMapping("/remove")
-	public String remove(@RequestParam("pno") int pno, RedirectAttributes reAttr) {
+	public String remove(@RequestParam("pno") int pno, PageVO pgvo, RedirectAttributes reAttr) {
 		int isUp = psv.remove(pno);
 		reAttr.addFlashAttribute("result", isUp > 0 ? "상품삭제 성공" : "상품삭제 실패");
+		reAttr.addFlashAttribute("pgvo", pgvo);
 		return "redirect:/product/list";
 	}
 	
 	@PostMapping("/modify")
-	public String modify(ProductVO pvo, RedirectAttributes reAtrr,
+	public String modify(ProductVO pvo, RedirectAttributes reAtrr, PageVO pgvo,
 			@RequestParam(name="files", required = false)MultipartFile[] files) {
 		int isUp = psv.modify(pvo);
 		if(isUp > 0 && files[0].getSize() > 0) {
 			isUp = fp.upload_file(files, pvo.getPno()); // 파일 수정
 		}
 		reAtrr.addFlashAttribute("result", isUp > 0 ? "상품수정 성공" : "상품 수정 실패");
+		reAtrr.addFlashAttribute("pgvo", pgvo);
 		return "redirect:/product/detail?pno=" + pvo.getPno(); // GET 방식
 	}
 	
 	@GetMapping({"/detail", "/modify"})
-	public void detail(Model model, @RequestParam("pno") int pno) {
+	public void detail(Model model, @RequestParam("pno") int pno, 
+			@ModelAttribute("pgvo") PageVO pgvo) { // 받은 걸 다시 view로 반환해야 할 때 @ModelAttribute 사용
 		model.addAttribute("pvo", psv.detail(pno));
 	}
 	

@@ -28,7 +28,7 @@ public class CommentService implements CommentServiceRule {
 	@Override
 	public CommentDTO getList(int pno, PageVO pgvo) { // totalCount
 		List<CommentVO> list = cdao.selectList(pno, pgvo);
-		int totalCount = cdao.selectCount(pno);
+		int totalCount = cdao.selectCount(pno, pgvo);
 		return new CommentDTO(totalCount, list);
 	}
 
@@ -47,9 +47,9 @@ public class CommentService implements CommentServiceRule {
 		return cdao.deleteAll(pno);
 	}
 
-	@Override
-	public int getTotalCount(int pno) {
-		return cdao.selectCount(pno);
-	}
+//	@Override
+//	public int getTotalCount(int pno) {
+//		return cdao.selectCount(pno);
+//	}
 
 }

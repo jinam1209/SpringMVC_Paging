@@ -12,5 +12,5 @@ public interface CommentServiceRule {
 	public int modify(CommentVO cvo);
 	public int remove(int cno);
 	public int removeAll(int pno);
-	public int getTotalCount(int pno);
+//	public int getTotalCount(int pno);
 }

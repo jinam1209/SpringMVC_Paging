@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 public class CommentDTO {
 	private static Logger logger = LoggerFactory.getLogger(CommentDTO.class);
 	private int totalCount;
-	private List<CommentVO> cmtlist;
+	private List<CommentVO> cmtlist; // result 로 받는 애
 	
 	public CommentDTO() {}
 
